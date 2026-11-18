@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LCP · Bad</title>
+  <style>
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #1d1d24; background: #f7f7fa; }
+    main { max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+    .bar { display: flex; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+    .tag { font-weight: 700; padding: 0.1rem 0.6rem; border-radius: 999px; background: #fdeeee; color: #b91c1c; }
+    .hero { display: block; width: 100%; height: auto; border-radius: 10px; }
+    /* Space is reserved so this demo only shows slow LCP, not layout shift (see the CLS demo for that). */
+    .hero-slot { aspect-ratio: 2 / 1; background: #ececf2; border-radius: 10px; }
+    .why { background: #fff; border: 1px solid #e3e3ea; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1.5rem; }
+  </style>
+
+  <!-- ❌ 1. Render-blocking stylesheet: the browser paints NOTHING until this (2s) file arrives. -->
+  <link rel="stylesheet" href="assets/slow.css?delay=2000">
+</head>
+<body>
+  <main>
+    <div class="bar"><span class="tag">BAD</span> Largest Contentful Paint <a href="lcp-good.html">Compare with the good version →</a></div>
+    <h1>Learn web performance</h1>
+
+    <div id="hero" class="hero-slot"></div>
+
+    <div class="why">
+      <b>Why is LCP slow here?</b> The hero image is the largest element, and three things delay it:
+      <ol>
+        <li>A render-blocking <code>&lt;link rel="stylesheet"&gt;</code> in <code>&lt;head&gt;</code> (2s).</li>
+        <li>Client-side rendering: the image URL only exists after JS runs and <code>api/hero</code> responds (1s).
+          The browser's preload scanner can't discover it in the HTML.</li>
+        <li><code>loading="lazy"</code> on an above-the-fold image deprioritises it.</li>
+      </ol>
+      The image itself takes 1.2s on both pages. Only the frontend code is different.
+    </div>
+    <p class="footer-note">Tip: don't click or scroll until the image appears. User input stops LCP measurement.</p>
+  </main>
+
+  <script>
+    // ❌ 2. Client-side rendering: fetch data first, only then create the <img>.
+    fetch('api/hero?delay=1000')
+      .then((res) => res.json())
+      .then(({ src, alt }) => {
+        // ❌ 3. loading="lazy" on the hero.
+        document.getElementById('hero').innerHTML =
+          `<img class="hero" src="${src}" alt="${alt}" loading="lazy" width="960" height="480">`;
+      });
+  </script>
+</body>
+</html>

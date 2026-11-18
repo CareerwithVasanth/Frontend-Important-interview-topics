@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LCP · Good</title>
+  <!-- ✅ 1. Critical CSS is inlined, so the first paint doesn't wait for any network request. -->
+  <style>
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #1d1d24; background: #f7f7fa; }
+    main { max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+    .bar { display: flex; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+    .tag { font-weight: 700; padding: 0.1rem 0.6rem; border-radius: 999px; background: #e9f8ee; color: #15803d; }
+    .hero { display: block; width: 100%; height: auto; border-radius: 10px; }
+    .why { background: #fff; border: 1px solid #e3e3ea; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1.5rem; }
+  </style>
+
+  <!-- ✅ 2. Same slow stylesheet, loaded without blocking render (media="print" trick). -->
+  <link rel="stylesheet" href="assets/slow.css?delay=2000" media="print" onload="this.media='all'">
+</head>
+<body>
+  <main>
+    <div class="bar"><span class="tag">GOOD</span> Largest Contentful Paint <a href="lcp-bad.html">← Compare with the bad version</a></div>
+    <h1>Learn web performance</h1>
+
+    <!-- ✅ 3. Hero is in the HTML (discovered immediately), not lazy, and marked high priority. -->
+    <img class="hero" src="assets/hero.png?delay=1200" alt="Hero banner" fetchpriority="high" width="960" height="480">
+
+    <div class="why">
+      <b>What changed?</b> It's the same 1.2s image from the same server.
+      <ol>
+        <li>Critical CSS is inline, and the slow stylesheet loads without blocking render.</li>
+        <li>The <code>&lt;img&gt;</code> is in the HTML, so the browser starts downloading it right away. No JS or API call is in front of it.</li>
+        <li>No <code>loading="lazy"</code> on the hero, and <code>fetchpriority="high"</code> instead.</li>
+      </ol>
+      LCP ≈ image download time (~1.2s) instead of CSS + JS + API + image chained one after another.
+    </div>
+    <p class="footer-note">Tip: don't click or scroll until the image appears. User input stops LCP measurement.</p>
+  </main>
+</body>
+</html>

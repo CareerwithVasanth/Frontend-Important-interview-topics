@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>INP · Bad</title>
+  <style>
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #1d1d24; background: #f7f7fa; }
+    main { max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+    .bar { display: flex; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+    .tag { font-weight: 700; padding: 0.1rem 0.6rem; border-radius: 999px; background: #fdeeee; color: #b91c1c; }
+    .shop { display: flex; gap: 1rem; align-items: center; background: #fff; border: 1px solid #e3e3ea; border-radius: 10px; padding: 1rem; }
+    button { font: inherit; font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 8px; border: 0; background: #6d28d9; color: #fff; cursor: pointer; }
+    button:active { transform: scale(0.97); }
+    .beat { display: inline-block; width: 18px; height: 18px; background: #6d28d9; border-radius: 3px; vertical-align: middle; }
+    .why { background: #fff; border: 1px solid #e3e3ea; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="bar"><span class="tag">BAD</span> Interaction to Next Paint <a href="inp-good.html">Compare with the good version →</a></div>
+    <h1>Click “Add to cart” a few times</h1>
+
+    <div class="shop">
+      <button id="add">Add to cart</button>
+      <span>Cart: <b id="count">0</b></span>
+      <span id="status"></span>
+    </div>
+    <p>Main thread heartbeat: <span id="beat" class="beat"></span>
+      <small>(driven by <code>requestAnimationFrame</code>, so it freezes whenever the main thread is busy)</small></p>
+
+    <div class="why">
+      <b>Why is INP poor here?</b> The click handler does 500ms of synchronous work (think recalculating
+      recommendations or a heavy analytics call) <i>before</i> updating the cart. The browser can't paint until
+      the handler returns, so the user sees no feedback for half a second.
+    </div>
+  </main>
+
+  <script>
+    const add = document.getElementById('add');
+    const count = document.getElementById('count');
+    const status = document.getElementById('status');
+    let cart = 0;
+
+    function blockMainThread(ms) {
+      const end = performance.now() + ms;
+      while (performance.now() < end) { /* busy */ }
+    }
+
+    add.addEventListener('click', () => {
+      // ❌ 500ms of blocking work BEFORE the UI update. Nothing can paint until it finishes.
+      blockMainThread(500);
+      count.textContent = ++cart;
+      status.textContent = 'Recommendations updated';
+    });
+
+    const beat = document.getElementById('beat');
+    let angle = 0;
+    (function tick() {
+      angle = (angle + 6) % 360;
+      beat.style.transform = `rotate(${angle}deg)`;
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>

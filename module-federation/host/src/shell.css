@@ -1,0 +1,40 @@
+:root { color-scheme: light; font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1d1d24; background: #f7f7fa; }
+body { margin: 0; }
+h2 { font-size: 1.05rem; margin: 0 0 0.5rem; }
+h3 { font-size: 0.95rem; margin: 0; }
+p { margin: 0 0 0.5rem; }
+a { color: #6d28d9; }
+code { font-family: ui-monospace, Menlo, monospace; font-size: 0.82rem; background: #ececf2; padding: 0.05rem 0.3rem; border-radius: 4px; }
+pre { font-family: ui-monospace, Menlo, monospace; font-size: 0.78rem; background: #ececf2; padding: 0.6rem; border-radius: 6px; overflow: auto; margin: 0.25rem 0 0; }
+table { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+th, td { text-align: left; padding: 0.25rem 0.4rem; border-bottom: 1px solid #e3e3ea; }
+.muted { color: #6b6b78; font-weight: 400; }
+.small { font-size: 0.8rem; }
+
+.shell-header { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.75rem 1.5rem; background: #1d1d24; color: #fff; }
+.shell-header .brand { font-weight: 700; font-size: 1.1rem; }
+.shell-header .owner { opacity: 0.6; font-size: 0.8rem; }
+.shell-header .spacer { flex: 1; }
+.shell-header select { font: inherit; padding: 0.15rem 0.3rem; border-radius: 4px; }
+.shell-cart-pill { background: #fff; color: #1d1d24; border-radius: 999px; padding: 0.15rem 0.7rem; font-weight: 600; }
+
+.shell-main { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1.5rem; display: grid; gap: 1rem; }
+.shell-lesson { background: #f1eafe; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; }
+.shell-lesson ul { margin: 0.25rem 0 0; padding-left: 1.2rem; }
+.shell-slots { display: grid; grid-template-columns: 3fr 2fr; gap: 1rem; align-items: start; }
+@media (max-width: 800px) { .shell-slots { grid-template-columns: 1fr; } }
+.shell-slot { position: relative; background: #fff; border: 2px dashed #c9c9d6; border-radius: 10px; padding: 1.4rem 0.75rem 0.75rem; min-height: 120px; }
+.shell-slot::before { content: attr(data-label); position: absolute; top: 0.2rem; left: 0.6rem; font: 0.7rem ui-monospace, Menlo, monospace; color: #8a8a99; }
+.shell-fallback { background: #fdeeee; color: #b91c1c; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 0.88rem; overflow-wrap: anywhere; }
+.shell-loading { color: #8a8a99; font-style: italic; }
+.shell-card { background: #fff; border: 1px solid #e3e3ea; border-radius: 10px; padding: 0.75rem 1rem; display: grid; gap: 0.5rem; }
+
+.lab-controls { background: #fff; border: 1px solid #e3e3ea; border-radius: 10px; padding: 0.75rem 1rem; display: grid; gap: 0.6rem; font-size: 14px; }
+.lab-controls nav { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.lab-controls a[aria-current] { font-weight: 700; text-decoration: none; color: #1d1d24; }
+.lab-team { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.lab-status { font-size: 0.75rem; font-weight: 600; padding: 0.05rem 0.45rem; border-radius: 999px; background: #f2f2f6; }
+.lab-status.up { background: #e9f8ee; color: #15803d; }
+.lab-status.down { background: #fdeeee; color: #b91c1c; }
+.lab-button { font: inherit; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid #6d28d9; background: transparent; color: #6d28d9; cursor: pointer; }
+.lab-controls ol { margin: 0; padding-left: 1.4rem; max-height: 180px; overflow: auto; font: 0.78rem/1.5 ui-monospace, Menlo, monospace; }

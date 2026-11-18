@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CLS · Bad</title>
+  <style>
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #1d1d24; background: #f7f7fa; }
+    main { max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+    .bar { display: flex; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+    .tag { font-weight: 700; padding: 0.1rem 0.6rem; border-radius: 999px; background: #fdeeee; color: #b91c1c; }
+    .hero { display: block; width: 100%; height: auto; border-radius: 10px; }
+    .promo { height: 52px; display: flex; align-items: center; justify-content: center; margin: 0.75rem 0; border-radius: 8px; background: #fff7e0; font-weight: 600; }
+    .why { background: #fff; border: 1px solid #e3e3ea; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="bar"><span class="tag">BAD</span> Cumulative Layout Shift <a href="cls-good.html">Compare with the good version →</a></div>
+
+    <!-- ❌ 1. No space reserved: the banner arrives late and pushes everything below it down. -->
+    <div id="banner"></div>
+
+    <h1>Learn web performance</h1>
+
+    <!-- ❌ 2. No width/height: the browser reserves 0px until the image downloads, then the text jumps. -->
+    <img class="hero" src="assets/hero.png?delay=800" alt="Hero banner">
+
+    <p>Try reading this paragraph while the page loads. It moves twice: once when the image arrives (0.8s)
+      and again when the promo banner is injected at the top (1.5s). If you were about to tap a link, you'd
+      tap the wrong thing.</p>
+    <p>Layout shift score = <i>impact fraction</i> (how much of the viewport moved) × <i>distance fraction</i>
+      (how far it moved). Large elements moving far = large score.</p>
+
+    <div class="why">
+      <b>Why is CLS high here?</b>
+      <ol>
+        <li>The image has no <code>width</code>/<code>height</code>, so its box height is 0 until it loads.</li>
+        <li>The banner is injected above existing content with no reserved space.</li>
+      </ol>
+    </div>
+  </main>
+
+  <script>
+    fetch('api/banner?delay=1500')
+      .then((res) => res.json())
+      .then(({ text }) => {
+        document.getElementById('banner').innerHTML = `<div class="promo">${text}</div>`;
+      });
+  </script>
+</body>
+</html>

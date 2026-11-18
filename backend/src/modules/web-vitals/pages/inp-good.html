@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>INP · Good</title>
+  <style>
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #1d1d24; background: #f7f7fa; }
+    main { max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+    .bar { display: flex; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+    .tag { font-weight: 700; padding: 0.1rem 0.6rem; border-radius: 999px; background: #e9f8ee; color: #15803d; }
+    .shop { display: flex; gap: 1rem; align-items: center; background: #fff; border: 1px solid #e3e3ea; border-radius: 10px; padding: 1rem; }
+    button { font: inherit; font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 8px; border: 0; background: #6d28d9; color: #fff; cursor: pointer; }
+    button:active { transform: scale(0.97); }
+    .beat { display: inline-block; width: 18px; height: 18px; background: #6d28d9; border-radius: 3px; vertical-align: middle; }
+    .why { background: #fff; border: 1px solid #e3e3ea; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="bar"><span class="tag">GOOD</span> Interaction to Next Paint <a href="inp-bad.html">← Compare with the bad version</a></div>
+    <h1>Click “Add to cart” a few times</h1>
+
+    <div class="shop">
+      <button id="add">Add to cart</button>
+      <span>Cart: <b id="count">0</b></span>
+      <span id="status"></span>
+    </div>
+    <p>Main thread heartbeat: <span id="beat" class="beat"></span>
+      <small>(driven by <code>requestAnimationFrame</code>, so it freezes whenever the main thread is busy)</small></p>
+
+    <div class="why">
+      <b>What changed?</b> It's the <i>same</i> 500ms of work, organised differently:
+      <ol>
+        <li>Update the UI first. The cart count is what the user is waiting to see.</li>
+        <li>Split the heavy work into 10ms chunks and <b>yield to the main thread</b> between them
+          (<code>scheduler.yield()</code>, falling back to <code>setTimeout</code>). The browser can paint and
+          handle other input in the gaps.</li>
+      </ol>
+    </div>
+  </main>
+
+  <script>
+    const add = document.getElementById('add');
+    const count = document.getElementById('count');
+    const status = document.getElementById('status');
+    let cart = 0;
+
+    function blockMainThread(ms) {
+      const end = performance.now() + ms;
+      while (performance.now() < end) { /* busy */ }
+    }
+
+    function yieldToMain() {
+      if (globalThis.scheduler?.yield) return scheduler.yield();
+      return new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    add.addEventListener('click', async () => {
+      // ✅ 1. Immediate feedback.
+      count.textContent = ++cart;
+      status.textContent = 'Updating recommendations…';
+
+      // ✅ 2. Same 500ms total, in 50 × 10ms chunks with a yield before each one.
+      for (let i = 0; i < 50; i++) {
+        await yieldToMain();
+        blockMainThread(10);
+      }
+      status.textContent = 'Recommendations updated';
+    });
+
+    const beat = document.getElementById('beat');
+    let angle = 0;
+    (function tick() {
+      angle = (angle + 6) % 360;
+      beat.style.transform = `rotate(${angle}deg)`;
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>

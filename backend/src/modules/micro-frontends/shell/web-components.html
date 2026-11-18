@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MiniShop · Micro frontends with Web Components</title>
+    <link rel="stylesheet" href="./shared/shell.css" />
+    <style>
+      /* Until a team's script defines its element, the tag is just an unknown inline element. */
+      team-products:not(:defined), team-cart:not(:defined) { display: block; color: #8a8a99; font-style: italic; }
+      team-products:not(:defined)::before { content: 'Loading products…'; }
+      team-cart:not(:defined)::before { content: 'Loading cart…'; }
+    </style>
+    <script>
+      // Classic inline script: defined before the team scripts below, so their onerror can call it.
+      window.__failedTeams = [];
+      window.__mfeFailed = (team, script) => window.__failedTeams.push({ team, src: script.src });
+    </script>
+    <!-- Each team ships one script that registers a Custom Element. Module scripts are fetched with CORS. -->
+    <script type="module" src="http://localhost:4001/element.js" onerror="window.__mfeFailed('products', this)"></script>
+    <script type="module" src="http://localhost:4002/element.js" onerror="window.__mfeFailed('cart', this)"></script>
+  </head>
+  <body>
+    <header class="shell-header">
+      <span class="brand">🛍️ MiniShop</span>
+      <span class="owner">shell · platform team · :4000</span>
+      <span class="spacer"></span>
+      <label>Currency <select id="currency"><option>INR</option><option>USD</option></select></label>
+      <span class="shell-cart-pill">🛒 <span id="cart-count">0</span></span>
+    </header>
+
+    <main class="shell-main">
+      <section class="shell-lesson">
+        <h2>2 · Web Components</h2>
+        <p>Each team ships a script that registers a <b>Custom Element</b> (<code>&lt;team-products&gt;</code>, <code>&lt;team-cart&gt;</code>). The shell just writes the tags. Everything runs in <b>one document</b>, but each component renders into its own <b>Shadow DOM</b>.</p>
+        <ul>
+          <li><b>Communication:</b> "props down, events up". The shell sets the <code>currency</code> attribute, listens for <code>add-to-cart</code> events, and calls <code>cart.add(product)</code>.</li>
+          <li><b>CSS isolation:</b> both teams use bare <code>h2</code>/<code>button</code> selectors, and so does the shell. Shadow DOM keeps them apart, so each team keeps its own colours and the shell's purple buttons don't leak in. Inherited properties like <code>font</code> and <code>color</code> do still flow in.</li>
+          <li><b>Framework-agnostic:</b> the shell doesn't know or care what each team built its element with.</li>
+          <li><b>Failure:</b> <code>&lt;script onerror&gt;</code> tells the shell which team failed. The <code>:not(:defined)</code> CSS shows a placeholder until the element is defined.</li>
+          <li><b>Gotcha:</b> the custom element registry is global. Two teams defining the same tag (or two versions of one) will throw.</li>
+        </ul>
+      </section>
+
+      <div class="shell-slots">
+        <div class="shell-slot" data-label="slot: <team-products> · script from http://localhost:4001/element.js">
+          <team-products currency="INR"></team-products>
+        </div>
+        <div class="shell-slot" data-label="slot: <team-cart> · script from http://localhost:4002/element.js">
+          <team-cart currency="INR"></team-cart>
+        </div>
+      </div>
+
+      <lab-controls></lab-controls>
+    </main>
+
+    <script type="module" src="./shared/lab-controls.js"></script>
+    <script type="module">
+      const controls = document.querySelector('lab-controls');
+      const log = (message) => controls.log(message);
+      const products = document.querySelector('team-products');
+      const cart = document.querySelector('team-cart');
+      const currency = document.getElementById('currency');
+
+      products.setAttribute('currency', currency.value);
+      cart.setAttribute('currency', currency.value);
+
+      function showFallback(team, src) {
+        const el = document.querySelector(`team-${team}`);
+        log(`✖ failed to load ${src}`);
+        el.outerHTML = `<div class="shell-fallback">The ${team} micro frontend failed to load. The rest of the shop still works.</div>`;
+      }
+      // Failures that happened before this module ran were queued by the inline script.
+      window.__failedTeams.forEach(({ team, src }) => showFallback(team, src));
+      window.__mfeFailed = (team, script) => showFallback(team, script.src);
+
+      for (const tag of ['team-products', 'team-cart']) {
+        customElements.whenDefined(tag).then(() => log(`✔ <${tag}> defined`));
+      }
+
+      // Events up: composed events cross the shadow boundary and bubble to the shell.
+      document.addEventListener('add-to-cart', (event) => {
+        log(`event add-to-cart from <${event.target.localName}>: ${event.detail.name} → calling cart.add()`);
+        if (typeof cart.add !== 'function') return log('✖ cart is not available, item dropped');
+        cart.add(event.detail);
+      });
+      document.addEventListener('cart-change', (event) => {
+        document.getElementById('cart-count').textContent = event.detail.count;
+        log(`event cart-change from <${event.target.localName}> (count=${event.detail.count})`);
+      });
+
+      // Props down: an attribute change triggers attributeChangedCallback inside each element.
+      currency.addEventListener('change', () => {
+        log(`shell → elements: setAttribute('currency', '${currency.value}')`);
+        products.setAttribute('currency', currency.value);
+        cart.setAttribute('currency', currency.value);
+      });
+    </script>
+  </body>
+</html>

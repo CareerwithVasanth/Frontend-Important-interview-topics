@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MiniShop · Micro frontends with iframes</title>
+    <link rel="stylesheet" href="./shared/shell.css" />
+  </head>
+  <body>
+    <header class="shell-header">
+      <span class="brand">🛍️ MiniShop</span>
+      <span class="owner">shell · platform team · :4000</span>
+      <span class="spacer"></span>
+      <label>Currency <select id="currency"><option>INR</option><option>USD</option></select></label>
+      <span class="shell-cart-pill">🛒 <span id="cart-count">0</span></span>
+    </header>
+
+    <main class="shell-main">
+      <section class="shell-lesson">
+        <h2>1 · Iframes</h2>
+        <p>Each team ships a whole page, and the shell puts it in an <code>&lt;iframe&gt;</code>. Each iframe is a separate document with its own JS realm, DOM, CSS and (because it's a different origin) its own <code>localStorage</code>.</p>
+        <ul>
+          <li><b>Communication:</b> <code>postMessage</code> only. Products → shell → Cart. Every receiver must check <code>event.origin</code>.</li>
+          <li><b>Props:</b> the initial currency is in the iframe URL (<code>?currency=INR</code>), and later changes are sent with <code>postMessage</code>.</li>
+          <li><b>Layout:</b> the shell can't see the content height, so each iframe reports it with a <code>resize</code> message.</li>
+          <li><b>Failure:</b> the shell can't read an iframe's HTTP status. It waits for a <code>ready</code> handshake and shows a fallback after a timeout.</li>
+          <li><b>Cost:</b> in the Network tab, every iframe downloads its own document, scripts and styles. Nothing is shared.</li>
+        </ul>
+      </section>
+
+      <div class="shell-slots">
+        <div class="shell-slot" id="products-slot" data-label="slot: products · <iframe src=http://localhost:4001/iframe.html>">
+          <iframe id="products-frame" title="Products"></iframe>
+        </div>
+        <div class="shell-slot" id="cart-slot" data-label="slot: cart · <iframe src=http://localhost:4002/iframe.html>">
+          <iframe id="cart-frame" title="Cart"></iframe>
+        </div>
+      </div>
+
+      <lab-controls></lab-controls>
+    </main>
+
+    <script type="module" src="./shared/lab-controls.js"></script>
+    <script type="module">
+      const controls = document.querySelector('lab-controls');
+      const log = (message) => controls.log(message);
+
+      const frames = {
+        products: { el: document.getElementById('products-frame'), origin: 'http://localhost:4001', ready: false },
+        cart: { el: document.getElementById('cart-frame'), origin: 'http://localhost:4002', ready: false },
+      };
+
+      const send = (team, message) => {
+        if (!frames[team].ready) return log(`✖ ${team} isn't available, dropped ${message.type}`);
+        frames[team].el.contentWindow.postMessage(message, frames[team].origin);
+      };
+
+      addEventListener('message', (event) => {
+        // Identify the sender by its window AND origin. Never trust event.data alone.
+        const team = Object.keys(frames).find((name) => frames[name].el.contentWindow === event.source);
+        if (!team || event.origin !== frames[team].origin) return;
+        const { type } = event.data ?? {};
+
+        if (type === 'ready') {
+          frames[team].ready = true;
+          log(`✔ ${team} iframe said ready (from ${event.origin})`);
+        } else if (type === 'resize') {
+          frames[team].el.style.height = `${event.data.height}px`;
+        } else if (type === 'add-to-cart') {
+          log(`postMessage ${event.origin} → shell: add-to-cart ${event.data.product.name}; forwarding to cart`);
+          send('cart', { type: 'add', product: event.data.product });
+        } else if (type === 'cart-changed') {
+          document.getElementById('cart-count').textContent = event.data.count;
+          log(`postMessage ${event.origin} → shell: cart-changed (count=${event.data.count})`);
+        }
+      });
+
+      // src is set only after the listener exists, so an early "ready" message can't be missed.
+      // An iframe whose server returns 503 still fires "load", so readiness comes from the handshake.
+      const currency = document.getElementById('currency').value;
+      for (const [team, frame] of Object.entries(frames)) {
+        frame.el.src = `${frame.origin}/iframe.html?currency=${currency}`;
+        setTimeout(() => {
+          if (frame.ready) return;
+          log(`✖ ${team} never said ready, showing fallback`);
+          frame.el.insertAdjacentHTML('afterend', `<div class="shell-fallback">The ${team} micro frontend isn't responding. The rest of the shop still works.</div>`);
+          frame.el.style.height = '60px';
+        }, 3000);
+      }
+
+      document.getElementById('currency').addEventListener('change', (event) => {
+        log(`shell → iframes: set-currency ${event.target.value}`);
+        for (const team of Object.keys(frames)) send(team, { type: 'set-currency', currency: event.target.value });
+      });
+    </script>
+  </body>
+</html>

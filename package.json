@@ -1,0 +1,21 @@
+{
+  "name": "web-fundamentals-lab",
+  "private": true,
+  "description": "End-to-end React + Node playground for learning web fundamentals (cookies, web vitals, micro frontends, ...)",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "module-federation/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web,mf-host,mf-products,mf-cart -c blue,magenta,green,cyan,yellow \"npm run dev -w backend\" \"npm run dev -w frontend\" \"npm run dev -w mf-host\" \"npm run dev -w mf-products\" \"npm run dev -w mf-cart\"",
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:mf": "concurrently -k -n mf-host,mf-products,mf-cart -c green,cyan,yellow \"npm run dev -w mf-host\" \"npm run dev -w mf-products\" \"npm run dev -w mf-cart\"",
+    "build": "npm run build -w frontend",
+    "start": "npm run start -w backend"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

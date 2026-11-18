@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CLS · Good</title>
+  <style>
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #1d1d24; background: #f7f7fa; }
+    main { max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+    .bar { display: flex; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+    .tag { font-weight: 700; padding: 0.1rem 0.6rem; border-radius: 999px; background: #e9f8ee; color: #15803d; }
+    .hero { display: block; width: 100%; height: auto; border-radius: 10px; }
+    .promo { height: 52px; display: flex; align-items: center; justify-content: center; margin: 0.75rem 0; border-radius: 8px; background: #fff7e0; font-weight: 600; }
+    /* ✅ 1. Reserve the banner's space up front (same height as .promo). */
+    .banner-slot { min-height: 52px; margin: 0.75rem 0; }
+    .banner-slot .promo { margin: 0; }
+    .banner-slot:empty { background: repeating-linear-gradient(45deg, #0000 0 10px, #0000000a 10px 20px); border-radius: 8px; }
+    .why { background: #fff; border: 1px solid #e3e3ea; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="bar"><span class="tag">GOOD</span> Cumulative Layout Shift <a href="cls-bad.html">← Compare with the bad version</a></div>
+
+    <div id="banner" class="banner-slot"></div>
+
+    <h1>Learn web performance</h1>
+
+    <!-- ✅ 2. width/height let the browser compute the aspect ratio and reserve the box before download. -->
+    <img class="hero" src="assets/hero.png?delay=800" alt="Hero banner" width="960" height="480">
+
+    <p>Try reading this paragraph while the page loads. Same image, same banner, same timing, but nothing
+      moves. The space was already reserved.</p>
+    <p>Layout shift score = <i>impact fraction</i> (how much of the viewport moved) × <i>distance fraction</i>
+      (how far it moved). Large elements moving far = large score.</p>
+
+    <div class="why">
+      <b>What changed?</b>
+      <ol>
+        <li><code>width="960" height="480"</code> on the image. CSS <code>height: auto</code> keeps it responsive,
+          and the browser uses the ratio to reserve the space.</li>
+        <li>The banner slot has a <code>min-height</code>, shown striped while it's empty. For real ads, reserve the
+          most common size, or place them below the fold.</li>
+      </ol>
+    </div>
+  </main>
+
+  <script>
+    fetch('api/banner?delay=1500')
+      .then((res) => res.json())
+      .then(({ text }) => {
+        document.getElementById('banner').innerHTML = `<div class="promo">${text}</div>`;
+      });
+  </script>
+</body>
+</html>
