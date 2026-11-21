@@ -10,7 +10,7 @@ export function PathScoping({ call }) {
       title="4. Path scoping"
       lessons={[
         'scoped_token is set with Path=/api/cookies/scoped.',
-        'It is sent to /api/cookies/scoped/inspect but NOT to /api/cookies/inspect, and it never shows in document.cookie (page path is /cookies).',
+        'It is sent to /api/cookies/scoped/inspect but NOT to /api/cookies/inspect, and it never shows in document.cookie (page path is /storage/cookies).',
         'Clearing with the wrong Path silently does nothing — Path must match exactly to delete.',
       ]}
     >

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { apiFetch, CREDENTIALS, TRANSPORTS } from '../../lib/api.js';
+import { apiFetch, CREDENTIALS, TRANSPORTS } from '../../../lib/api.js';
 import { BrowserJar } from './BrowserJar.jsx';
 import { RequestLog } from './ResultView.jsx';
 import { InspectPanel } from './InspectPanel.jsx';
@@ -23,9 +23,9 @@ export function CookiesLab() {
   );
 
   return (
-    <main className="container stack">
+    <div className="stack">
       <div>
-        <h1>🍪 Cookies, end to end</h1>
+        <h2>🍪 Cookies, end to end</h2>
         <p className="muted">
           Every button makes a real request to the Node backend. Keep DevTools open on
           <b> Application → Cookies</b> and <b>Network</b>, and watch the backend terminal for the raw
@@ -73,6 +73,6 @@ export function CookiesLab() {
           <RequestLog log={log} onClear={() => setLog([])} />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -104,3 +104,40 @@ td.mono { font-family: var(--mono); word-break: break-all; }
 .log { max-height: 340px; overflow: auto; }
 .log details { border-bottom: 1px solid var(--border); padding: 0.3rem 0; }
 .log summary { cursor: pointer; font-family: var(--mono); font-size: 0.8rem; }
+
+button:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+button.secondary.danger { color: var(--err); border-color: var(--err); }
+
+/* Sub-navigation inside a lab (e.g. Storage → Cookies / IndexedDB / Cache Storage) */
+.tabs { display: flex; gap: 0.25rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+.tabs a { padding: 0.45rem 0.85rem; text-decoration: none; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs a:hover { color: var(--text); }
+.tabs a.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+.steps { margin: 0.25rem 0 0.5rem; padding-left: 1.4rem; }
+.steps li { margin-bottom: 0.2rem; }
+
+.event-log { list-style: none; margin: 0; padding: 0; max-height: 360px; overflow: auto; font-size: 0.85rem; }
+.event-log li { display: flex; gap: 0.5rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+.event-icon { flex: none; width: 1.4rem; text-align: center; }
+
+.timers { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; margin: 0.75rem 0; }
+.timer { display: flex; flex-direction: column; background: var(--code-bg); border-radius: 8px; padding: 0.45rem 0.65rem; }
+.timer b { font-size: 1.1rem; }
+
+/* IndexedDB demo: social feed */
+.phone { border: 1px solid var(--border); border-radius: 14px; max-height: 620px; overflow: auto; background: var(--bg); }
+.phone-status { position: sticky; top: 0; z-index: 1; padding: 0.4rem 0.75rem; background: var(--panel); border-bottom: 1px solid var(--border); }
+.phone-empty { padding: 1.5rem; text-align: center; }
+.post { display: flex; gap: 0.65rem; padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--border); background: var(--panel); }
+.post-new { animation: slide-in 0.5s ease-out; background: var(--ok-bg); }
+@keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.avatar { flex: none; width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; }
+button.like { background: transparent; border: none; color: var(--text); padding: 0; }
+button.like.liked { color: var(--err); font-weight: 600; }
+
+/* Cache Storage demo: photo gallery */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+.photo { margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.photo-frame { aspect-ratio: 400 / 260; border-radius: 8px; background: var(--code-bg); display: grid; place-items: center; overflow: hidden; }
+.photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }

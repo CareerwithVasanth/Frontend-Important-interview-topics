@@ -1,4 +1,4 @@
-import { Link, NavLink, Route, Routes } from 'react-router';
+import { Link, Navigate, NavLink, Route, Routes } from 'react-router';
 import { labs } from './labs/registry.js';
 
 function Home() {
@@ -32,8 +32,10 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         {labs.map(({ slug, Component }) => (
-          <Route key={slug} path={`/${slug}`} element={<Component />} />
+          <Route key={slug} path={`/${slug}/*`} element={<Component />} />
         ))}
+        {/* Old URL from before Cookies moved into the Storage lab. */}
+        <Route path="/cookies" element={<Navigate to="/storage/cookies" replace />} />
         <Route path="*" element={<main className="container"><p>Not found. <Link to="/">Go home</Link></p></main>} />
       </Routes>
     </>

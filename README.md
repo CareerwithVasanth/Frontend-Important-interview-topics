@@ -1,6 +1,6 @@
 # Web Fundamentals Lab
 
-An end-to-end **React (Vite) + Node (Express)** playground for learning how the web works: cookies, Core Web Vitals and micro frontends today, with caching, CORS, and more to come.
+An end-to-end **React (Vite) + Node (Express)** playground for learning how the web works: browser storage (cookies, IndexedDB, Cache Storage), Core Web Vitals and micro frontends today, with caching, CORS, and more to come.
 
 ```
 web-fundamentals-lab/
@@ -13,6 +13,7 @@ web-fundamentals-lab/
 │       └── modules/
 │           ├── index.js    # ← register new backend labs here
 │           ├── cookies/routes.js
+│           ├── storage/routes.js   # slow feed API + slow photos (no-store) for the IndexedDB / Cache Storage demos
 │           ├── web-vitals/
 │           │   ├── routes.js   # slow assets (?delay=ms), no-store, serves pages/
 │           │   └── pages/      # plain HTML good/bad demo pairs (lcp, cls, inp)
@@ -31,7 +32,10 @@ web-fundamentals-lab/
         ├── lib/api.js      # fetch wrapper + transport/credentials switch
         └── labs/
             ├── registry.js # ← register new frontend labs here
-            ├── cookies/    # Cookies lab UI
+            ├── storage/    # Storage lab: overview + tabs
+            │   ├── cookies/        # Cookies demo UI
+            │   ├── indexeddb/      # Social feed backed by IndexedDB (feedDb.js = data layer)
+            │   └── cache-storage/  # Photo gallery backed by the Cache API
             ├── web-vitals/ # Web Vitals lab UI (links out to the demo pages)
             └── micro-frontends/ # Micro Frontends lab UI (links out to the demo shops)
 ```
@@ -43,13 +47,17 @@ npm install
 npm run dev        # API on :4000 (+ team servers :4001/:4002), web on :5173, Module Federation on :5180-5182
 ```
 
-Open http://localhost:5173/cookies. Keep **DevTools → Application → Cookies** and **Network** open, and watch the backend terminal. It logs the raw `Cookie` and `Set-Cookie` headers for every request.
+Open http://localhost:5173/storage/cookies (the old `/cookies` URL redirects there). Keep **DevTools → Application → Cookies** and **Network** open, and watch the backend terminal. It logs the raw `Cookie` and `Set-Cookie` headers for every request.
 
 Optional: `cp backend/.env.example backend/.env` to change the port, allowed origins, or cookie secret.
 
-## Cookies lab
+## Storage lab
 
-### Transport switch (top of the page)
+Open http://localhost:5173/storage. The overview compares cookies, localStorage, sessionStorage, IndexedDB and Cache Storage, and shows how much storage this origin is using. Each storage type has its own tab.
+
+### Cookies
+
+#### Transport switch (top of the page)
 
 | Mode | Frontend calls | What it demonstrates |
 |------|----------------|----------------------|
@@ -59,7 +67,7 @@ Optional: `cp backend/.env.example backend/.env` to change the port, allowed ori
 
 The `credentials` dropdown (`include` / `same-origin` / `omit`) shows how `fetch` decides whether to send and store cookies.
 
-### Scenarios
+#### Scenarios
 
 1. **Server view**: `GET /api/cookies/inspect` echoes the `Cookie` header the browser sent.
 2. **Attribute playground**: `POST /api/cookies/set` / `clear` with any combination of `HttpOnly`, `Secure`, `SameSite`, `Max-Age`, `Path`, and signed. Presets include an invalid `SameSite=None` without `Secure`.
@@ -69,7 +77,7 @@ The `credentials` dropdown (`include` / `same-origin` / `omit`) shows how `fetch
 
 The right column shows `document.cookie` live (HttpOnly cookies never appear there) and a request log.
 
-### Guided walkthrough
+#### Guided walkthrough
 
 1. Log in through the proxy. `sid` is in DevTools but not in `document.cookie`, yet `/me` works.
 2. Switch to **Cross-origin, same-site**. The same cookies are still sent, because cookies are scoped by host and ignore the port.
@@ -78,6 +86,26 @@ The right column shows `document.cookie` live (HttpOnly cookies never appear the
 5. Restart the backend. The browser still has `sid`, but the server has forgotten the session, so `/me` returns 401.
 
 > Browser note: third-party cookie settings (Incognito, Safari ITP, Firefox ETP) can block even `SameSite=None; Secure` cookies in cross-site mode. Try the same steps in different browsers and compare.
+
+### IndexedDB: an offline-first social feed
+
+http://localhost:5173/storage/indexeddb. `GET /api/storage/feed` is deliberately slow (about 1.5s) and sends `no-store`, so any speed-up comes from IndexedDB alone. The page uses the **cache, then network** pattern: show posts from IndexedDB right away, fetch fresh posts in the background, save them, and update the screen.
+
+1. On the first visit the feed is empty for about 1.5s, then posts appear and are saved to the `posts` store.
+2. Click **Reopen app**. Posts appear in a few milliseconds from IndexedDB, then new ones (a new post is created every 20s) slide in with a "new" badge.
+3. Tick **Simulate offline** and reopen. The feed still works.
+4. Like a post. The like is saved in the `likes` store and survives a page reload.
+5. Filter by author. This reads through the `by_author` index without using the network.
+6. Open **DevTools → Application → IndexedDB → social-feed-lab** to see the stores, then click **Delete database** to start over.
+
+### Cache Storage: a photo gallery
+
+http://localhost:5173/storage/cache-storage. Each photo (`/api/storage/photos/<n>.svg`) takes about 1.2s and shows the time the server rendered it.
+
+1. In **Network only** mode, every reload waits about 1.2s per photo and the render time changes each time.
+2. Switch to **Cache first**. The first load goes to the network and the response is saved with `cache.put()`. After that, photos load in a few milliseconds and the render time stays the same, because it is the exact stored response.
+3. Tick **Simulate offline**. Cached photos still load and uncached ones fail.
+4. Use the inspector to see and delete entries, or click **Deploy v2** to create a new cache version and delete the old one, as a Service Worker does on `activate`.
 
 ## Web Vitals lab
 

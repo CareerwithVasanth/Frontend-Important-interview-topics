@@ -1,14 +1,15 @@
-import { CookiesLab } from './cookies/CookiesLab.jsx';
 import { MicroFrontendsLab } from './micro-frontends/MicroFrontendsLab.jsx';
+import { StorageLab } from './storage/StorageLab.jsx';
 import { WebVitalsLab } from './web-vitals/WebVitalsLab.jsx';
 
 // Register new labs here (performance, caching, CORS, ...). Each gets a route and a home-page card.
+// A lab owns every URL under /<slug>/, so it can have its own sub-pages (see StorageLab).
 export const labs = [
   {
-    slug: 'cookies',
-    title: 'Cookies',
-    description: 'Set-Cookie, HttpOnly, Secure, SameSite, Path, Max-Age, sessions, signed cookies, and CORS credentials.',
-    Component: CookiesLab,
+    slug: 'storage',
+    title: 'Storage',
+    description: 'Cookies, IndexedDB and Cache Storage: what each is for, with hands-on demos (login sessions, an offline social feed, a cached photo gallery).',
+    Component: StorageLab,
   },
   {
     slug: 'web-vitals',

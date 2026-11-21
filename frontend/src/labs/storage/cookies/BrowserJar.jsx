@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { parseDocumentCookie } from '../../lib/api.js';
+import { parseDocumentCookie } from '../../../lib/api.js';
 
 // What JavaScript on this page can see via document.cookie (HttpOnly cookies never appear here).
 export function BrowserJar() {

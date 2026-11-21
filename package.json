@@ -1,7 +1,7 @@
 {
   "name": "web-fundamentals-lab",
   "private": true,
-  "description": "End-to-end React + Node playground for learning web fundamentals (cookies, web vitals, micro frontends, ...)",
+  "description": "End-to-end React + Node playground for learning web fundamentals (storage, web vitals, micro frontends, ...)",
   "workspaces": [
     "backend",
     "frontend",
